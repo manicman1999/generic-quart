@@ -200,6 +200,8 @@ class AIClient:
                 temperature=temperature,
                 max_tokens=maxTokens,
             )
+            messageChoice = response.choices[0]
+            result = messageChoice.message.content # type: ignore
         else:
             response = await self.openaiClient.beta.chat.completions.parse(
                 model=model,
@@ -208,6 +210,8 @@ class AIClient:
                 temperature=temperature,
                 max_tokens=maxTokens,
             )
+            messageChoice = response.choices[0]
+            result = messageChoice.message.parsed
 
         if response.usage:
             cachedTokens = 0
@@ -236,15 +240,9 @@ class AIClient:
             properties=properties,
         )
 
-        messageChoice = response.choices[0]
-        if responseType is str:
-            result: Optional[str] = messageChoice.message.content
-        else:
-            result: Optional[responseType] = messageChoice.message.parsed
-
         if result is None:
             return Option.Error(
                 DomainError("AIClient-ChatCompletion-E03", "No response provided.")
             )
 
-        return Option(result)
+        return Option(result) # type: ignore
