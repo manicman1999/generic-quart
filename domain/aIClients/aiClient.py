@@ -175,7 +175,7 @@ class AIClient:
         temperature: Optional[float] = None,
         maxTokens: Optional[int] = None,
         responseType: Type[OT] = str,
-    ) -> Option[str]:
+    ) -> Option[OT]:
         messageThread = [{"role": "system", "content": system}] + [
             m.oai() for m in messages
         ]
@@ -196,15 +196,15 @@ class AIClient:
         if responseType is str:
             response = await self.openaiClient.chat.completions.create(
                 model=model,
-                messages=messageThread, # type: ignore
+                messages=messageThread,  # type: ignore
                 temperature=temperature,
                 max_tokens=maxTokens,
             )
         else:
             response = await self.openaiClient.beta.chat.completions.parse(
                 model=model,
-                messages=messageThread, # type: ignore
-                response_format=object,
+                messages=messageThread,  # type: ignore
+                response_format=responseType,
                 temperature=temperature,
                 max_tokens=maxTokens,
             )
@@ -217,9 +217,9 @@ class AIClient:
             inputTokens = response.usage.prompt_tokens - cachedTokens
             outputTokens = response.usage.completion_tokens
 
-        cachedCost = cachedTokens * CACHED_COST.get(TextGenerationModel(model), 0)
-        inputCost = inputTokens * INPUT_COST.get(TextGenerationModel(model), 0)
-        outputCost = outputTokens * OUTPUT_COST.get(TextGenerationModel(model), 0)
+        cachedCost = cachedTokens * CACHED_COST.get(TextGenerationModel(model), 0) / 1e6
+        inputCost = inputTokens * INPUT_COST.get(TextGenerationModel(model), 0) / 1e6
+        outputCost = outputTokens * OUTPUT_COST.get(TextGenerationModel(model), 0) / 1e6
 
         properties = {
             "cachedTokens": cachedTokens,
@@ -232,9 +232,16 @@ class AIClient:
         }
 
         Logger.info(
-            f"Generated a chat completion using model {model}, costing ${(cachedCost + inputCost + outputCost)}.", properties=properties
+            f"Generated a chat completion using model {model}, costing ${(cachedCost + inputCost + outputCost)}. {cachedTokens} cached tokens, {inputTokens} input tokens, {outputTokens} output tokens.",
+            properties=properties,
         )
-        result = response.choices[0].message.content
+
+        messageChoice = response.choices[0]
+        if responseType is str:
+            result: Optional[str] = messageChoice.message.content
+        else:
+            result: Optional[responseType] = messageChoice.message.parsed
+
         if result is None:
             return Option.Error(
                 DomainError("AIClient-ChatCompletion-E03", "No response provided.")
