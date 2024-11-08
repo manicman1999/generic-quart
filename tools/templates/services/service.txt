@@ -1,0 +1,11 @@
+from typing import Type
+from services.abstractService.abstractService import AbstractService
+
+from domain.{model}s.{model} import {Model}
+
+
+class {Model}Service(AbstractService[{Model}]):
+
+    @classmethod
+    def _entityType(cls) -> Type[{Model}]:
+        return {Model}

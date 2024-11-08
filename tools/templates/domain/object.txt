@@ -1,0 +1,11 @@
+from dataclasses import dataclass
+from datetime import datetime
+from uuid import uuid4
+from domain.abstractEntity.abstractEntity import AbstractEntity
+
+@dataclass
+class {Model}(AbstractEntity):
+
+    def __init__(self):
+        now = datetime.utcnow()
+        super().__init__(uuid4(), now, None, now, None)

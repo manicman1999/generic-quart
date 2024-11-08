@@ -1,0 +1,18 @@
+from uuid import UUID
+from typing import Any
+
+from domain.{model}s.{model} import {Model}
+from persistence.dbClient import getDb
+from domain.option.option import Option
+from domain.utility.errorHandling import serviceErrorHandling
+
+@serviceErrorHandling
+async def {Name}Query({model}Ids: list[UUID]) -> Option[list[{Model}]]:
+    collection = getDb()[{Model}.getCollectionName()]
+
+    query: dict[str, Any] = {"_id": {"$in": {model}Ids}}
+
+    cursor = collection.find(query)
+    serialized_objects = [{Model}.fromDict(document) async for document in cursor]
+    
+    return Option(serialized_objects)

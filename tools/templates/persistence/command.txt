@@ -1,0 +1,32 @@
+from uuid import UUID
+from datetime import datetime
+from typing import Any
+from domain.domainError.domainError import DomainError
+from persistence.dbClient import getDb
+from domain.{model}s.{model} import {Model}
+from domain.option.option import Option
+from domain.utility.errorHandling import serviceErrorHandling
+from domain.utility.userProvider import UserProvider
+from pymongo import ReturnDocument
+
+@serviceErrorHandling
+async def {Name}Command({model}Id: UUID) -> Option[{Model}]:
+    collection = getDb()[{Model}.getCollectionName()]
+
+    updatedDate = datetime.utcnow()
+    updatedBy = UserProvider.userId()
+
+    filter: dict[str, Any] = {'_id': {model}Id}
+
+    update = {
+        "$set": {
+            "updatedDate": updatedDate,
+            "updatedBy": updatedBy
+        }
+    }
+
+    result = await collection.find_one_and_update(filter, update, return_document=ReturnDocument.AFTER)
+
+    if result:
+        return Option({Model}.fromDict(result))
+    return Option.Error(DomainError("{Name}Command-E02", "Could not find {Model}."))

@@ -1,0 +1,154 @@
+[
+    {
+        "UserController": [
+            {
+                "prefix": "/users",
+                "rule": "/<string:userId>",
+                "methods": [
+                    "GET"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": false,
+                "inputTemplate": null,
+                "inputType": null,
+                "outputType": "User"
+            },
+            {
+                "prefix": "/users",
+                "rule": "",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": true,
+                "inputTemplate": null,
+                "inputType": null,
+                "outputType": null
+            },
+            {
+                "prefix": "/users",
+                "rule": "/verify",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": false,
+                "inputTemplate": {
+                    "email": "",
+                    "username": "",
+                    "password": "",
+                    "roles": [
+                        ""
+                    ],
+                    "profileImageUrl": null,
+                    "salt": "",
+                    "verificationHash": "",
+                    "verificationSendTime": null,
+                    "isGuest": null,
+                    "isVerified": null
+                },
+                "inputType": "User",
+                "outputType": "User"
+            },
+            {
+                "prefix": "/users",
+                "rule": "/add-role",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [
+                    "Admin"
+                ],
+                "jwtOptional": false,
+                "inputTemplate": null,
+                "inputType": null,
+                "outputType": "User"
+            },
+            {
+                "prefix": "/users",
+                "rule": "/resend-code",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": false,
+                "inputTemplate": null,
+                "inputType": null,
+                "outputType": "bool"
+            },
+            {
+                "prefix": "/users",
+                "rule": "/verify-email",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": false,
+                "inputTemplate": {
+                    "value": ""
+                },
+                "inputType": "StringDTO",
+                "outputType": "User"
+            },
+            {
+                "prefix": "/users",
+                "rule": "/generate-profile-images",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": false,
+                "inputTemplate": {
+                    "value": ""
+                },
+                "inputType": "StringDTO",
+                "outputType": "list[str]"
+            },
+            {
+                "prefix": "/users",
+                "rule": "/set-profile-image",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": false,
+                "inputTemplate": {
+                    "value": ""
+                },
+                "inputType": "StringDTO",
+                "outputType": "User"
+            }
+        ]
+    },
+    {
+        "AuthController": [
+            {
+                "prefix": "/auth",
+                "rule": "/login",
+                "methods": [
+                    "POST"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": true,
+                "inputTemplate": {
+                    "username": "",
+                    "password": ""
+                },
+                "inputType": "Auth",
+                "outputType": null
+            },
+            {
+                "prefix": "/auth",
+                "rule": "/context",
+                "methods": [
+                    "GET"
+                ],
+                "requiredRoles": [],
+                "jwtOptional": false,
+                "inputTemplate": null,
+                "inputType": null,
+                "outputType": "UserIdentity"
+            }
+        ]
+    }
+]
