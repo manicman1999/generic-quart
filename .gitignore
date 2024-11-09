@@ -147,3 +147,4 @@ key.json
 !.elasticbeanstalk/*.global.yml
 
 postman_collection.json
+registry.json
