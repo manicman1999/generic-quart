@@ -94,7 +94,7 @@ class AIClient:
                     "prompt": prompt,
                     "width": width,
                     "height": height,
-                    "safety_tolerance": 5,
+                    "safety_tolerance": 2,
                 },
             )
             for _ in range(n)
