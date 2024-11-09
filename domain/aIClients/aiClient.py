@@ -73,9 +73,7 @@ class AIClient:
             self.initialized = True
 
     @serviceErrorHandling
-    async def generateImages(
-        self, prompt: str, ratio: Literal["16:9", "1:1", "9:16"] = "1:1", n=1
-    ) -> Option[list[str]]:
+    async def generateImages(self, prompt: str, ratio: str, n=1) -> Option[list[str]]:
         width, height = 1024, 1024
         if ratio == "16:9":
             width, height = 1440, 800
@@ -129,12 +127,6 @@ class AIClient:
                 if resultData["status"] == "Ready":
                     output = resultData["result"]["sample"]
 
-                    totalTime = time.time() - startTime
-                    Logger.info(
-                        f"Generated an image using Flux Pro 1.1 in {round(totalTime, 3)} seconds.",
-                        {"time": totalTime},
-                    )
-
                     if isinstance(output, list):
                         ogImageUrls.append(output[0])
                     else:
@@ -145,6 +137,12 @@ class AIClient:
             requestIds = [rid for rid in requestIds if rid not in ridsToRemove]
             if not requestIds:
                 break
+        
+        totalTime = time.time() - startTime
+        Logger.info(
+            f"Generated {len(ogImageUrls)} images using Flux Pro 1.1 in {round(totalTime, 3)} seconds.",
+            {"time": totalTime},
+        )
 
         reuploadStartTime = time.time()
         s3client = S3Client()
@@ -155,7 +153,7 @@ class AIClient:
         ]
         totalReuploadTime = time.time() - reuploadStartTime
         Logger.info(
-            f"Reuploaded images in {round(totalReuploadTime, 3)} seconds.",
+            f"Reuploaded {len(ogImageUrls)} images in {round(totalReuploadTime, 3)} seconds.",
             {"time": totalReuploadTime},
         )
 

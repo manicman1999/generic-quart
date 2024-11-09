@@ -12,6 +12,7 @@ from typing import (
     get_type_hints,
 )
 from quart import Blueprint, request
+from datetime import datetime
 
 from api.auth.roleChecking import verifyRoles
 from domain.abstractEntity.abstractEntity import AbstractEntity
@@ -82,8 +83,23 @@ class AbstractController(Generic[T]):
         *args,
         **kwargs,
     ):
-        # Get URL query parameters
-        url_params = request.args.to_dict()
+        # Get URL query parameters and attempt to convert numeric strings and dates
+        url_params = {}
+        for key, value in request.args.to_dict().items():
+            try:
+                # Try to convert to int first
+                url_params[key] = int(value)
+            except ValueError:
+                try:
+                    # Try to convert to float if int fails
+                    url_params[key] = float(value)
+                except ValueError:
+                    try:
+                        # Try to parse as ISO date if numeric conversions fail
+                        url_params[key] = datetime.fromisoformat(value.replace('Z', '+00:00'))
+                    except ValueError:
+                        # Keep as string if all conversions fail
+                        url_params[key] = value
         
         if entity is not None:
             result = await f(entity, *args, **kwargs, **url_params)

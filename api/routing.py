@@ -3,12 +3,14 @@ from quart import Quart
 from api.abstractEntity.abstractController import AbstractController
 from api.auth.authController import AuthController
 from api.users.userController import UserController
+from api.imageGenerations.imageGenerationController import ImageGenerationController
 
 
 def addRoutes(app: Quart):
     controllers: list[AbstractController] = [
         UserController(),
         AuthController(),
+        ImageGenerationController(),
     ]
 
     for controller in controllers:
