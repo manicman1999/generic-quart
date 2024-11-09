@@ -22,6 +22,6 @@ class AIMessage(BaseEntity):
 
     def oai(self) -> dict[str, str]:
         return {
-            "role": str(self.role),
+            "role": self.role.value,
             "content": self.content
         }
