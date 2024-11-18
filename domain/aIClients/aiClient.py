@@ -46,6 +46,20 @@ OUTPUT_COST = {
     TextGenerationModel.o1: 60.00
 }
 
+
+class ImageGenerationModel(str, Enum):
+    FluxDev = "flux-dev"
+    FluxPro = "flux-pro-1.1"
+    FluxUltra = "flux-pro-1.1-ultra"
+
+
+IMAGE_COST = {
+    ImageGenerationModel.FluxDev: 0.025,
+    ImageGenerationModel.FluxPro: 0.04,
+    ImageGenerationModel.FluxUltra: 0.06,
+}
+
+
 class AIClient:
     _instance: AIClient = None  # type: ignore
 
@@ -73,7 +87,16 @@ class AIClient:
             self.initialized = True
 
     @serviceErrorHandling
-    async def generateImages(self, prompt: str, ratio: str, n=1) -> Option[list[str]]:
+    async def generateImages(
+        self,
+        prompt: str,
+        ratio: str,
+        n=1,
+        model: Union[str, ImageGenerationModel] = ImageGenerationModel.FluxDev,
+    ) -> Option[list[str]]:
+        if isinstance(model, str):
+            model = ImageGenerationModel(model)
+
         width, height = 1024, 1024
         if ratio == "16:9":
             width, height = 1440, 800
@@ -84,7 +107,7 @@ class AIClient:
 
         startTasks = [
             self.httpClient.post(
-                "https://api.bfl.ml/v1/flux-pro-1.1",
+                f"https://api.bfl.ml/v1/{model}",
                 headers={
                     "accept": "application/json",
                     "x-key": self.bflKey,
@@ -94,7 +117,8 @@ class AIClient:
                     "prompt": prompt,
                     "width": width,
                     "height": height,
-                    "safety_tolerance": 2,
+                    "safety_tolerance": 5,
+                    "aspect_ratio": ratio,
                 },
             )
             for _ in range(n)
@@ -137,11 +161,12 @@ class AIClient:
             requestIds = [rid for rid in requestIds if rid not in ridsToRemove]
             if not requestIds:
                 break
-        
+
         totalTime = time.time() - startTime
+        cost = IMAGE_COST[model] * len(ogImageUrls)
         Logger.info(
-            f"Generated {len(ogImageUrls)} images using Flux Pro 1.1 in {round(totalTime, 3)} seconds.",
-            {"time": totalTime},
+            f"Generated {len(ogImageUrls)} images using {model.name} in {round(totalTime, 3)} seconds, costing ${cost}",
+            {"time": totalTime, "cost": cost},
         )
 
         reuploadStartTime = time.time()
