@@ -85,6 +85,8 @@ def convert_to_ts(registry_path: str, ts_path: str):
                 else:
                     inputVars = "cookieToken?: string"
                 
+                inputVars += ", queryParams?: QueryParams"
+                
                 ts_function = f"""
     static async {func_name}({inputVars}): Promise<{output_type or "any"}> {{
         let token = cookieToken ?? '';
@@ -92,9 +94,19 @@ def convert_to_ts(registry_path: str, ts_path: str):
         if (token == '' && typeof window !== 'undefined') {{
             token = getCookie('token') || '';  // Still fall back to localStorage for now if needed
         }}
+
+        let queryString = '';
+        if (queryParams) {{
+            queryString = '?' + Object.keys(queryParams)
+                .filter(key => queryParams[key] !== undefined)
+                .map(key => 
+                    encodeURIComponent(key) + '=' + encodeURIComponent(String(queryParams[key]))
+                )
+                .join('&');
+        }}
         
         console.log("Calling {func_name} with token: " + token)
-        const response = await fetch(`{url}`, {{
+        const response = await fetch(`{url}${{queryString}}`, {{
             method: '{route['methods'][0]}',
             headers: {{
                 'Authorization': `Bearer ${{token}}`,
@@ -130,6 +142,10 @@ import {{ {', '.join(filter(lambda x: x not in inputTypeMatch.values(), seen_typ
 import {{ HOST }} from './config';
 import {{ getCookie }} from './cookieHandler';
 import DomainErrorException from './domainError';
+
+type QueryParams = {{
+    [key: string]: string | number | undefined;
+}};
 
 """
     
